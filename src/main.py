@@ -1,4 +1,4 @@
-from textnode import *
+from textnode import TextNode, TextType
 from htmlnode import HTMLNode, LeafNode, ParentNode
 
 def main():
@@ -7,5 +7,6 @@ def main():
     leafnode = LeafNode("p", "text")
     parentnode = ParentNode(None, [LeafNode("p", "text", {"key": "site"})],)
     print(parentnode.to_html())
+
 
 main()

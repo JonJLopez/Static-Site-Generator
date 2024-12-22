@@ -16,6 +16,10 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode("h1", "text inside", ["child1", "child2", "child3"], {})
         correct = ''
         self.assertEqual(node.props_to_html(), correct)
+    def test_eq(self):
+        node = HTMLNode("t", "text", ["item1", "item2"], {"a": "1", "b": "2"})
+        node2 = HTMLNode("t", "text", ["item1", "item2"], {"a": "1", "b": "2"})
+        self.assertEqual(node, node2)
 
 class TestLeafNode(unittest.TestCase):
     def test_to_html(self):

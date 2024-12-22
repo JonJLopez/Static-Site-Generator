@@ -13,6 +13,12 @@ class HTMLNode():
         + f"children: {self.children}, "
         + f"props: {self.props}")
     
+    def __eq__(self, other):
+        return (self.tag == other.tag
+                and self.value == other.value
+                and self.children == other.children
+                and self.props == other.props)
+    
     def to_html(self):
         raise NotImplementedError()
     

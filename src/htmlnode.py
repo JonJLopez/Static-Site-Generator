@@ -8,11 +8,10 @@ class HTMLNode():
         self.props = props          # dictionary representing attributes of HTML tag
 
     def __repr__(self):
-        return (f"--------HTMLNODE--------\n"
-        + f"tag = {self.tag}\n"
-        + f"value = {self.value}\n"
-        + f"children = {self.children}\n"
-        + f"props = {self.props}")
+        return (f"tag: {self.tag}, "
+        + f"value: {self.value}, "
+        + f"children: {self.children}, "
+        + f"props: {self.props}")
     
     def to_html(self):
         raise NotImplementedError()
@@ -32,3 +31,14 @@ class LeafNode(HTMLNode):
         if self.tag is None:
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+    
+class ParentNode(HTMLNode):
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if self.tag == None or self.tag == "":
+            raise ValueError("Parent node must have a tag value")
+        if self.children is None or len(self.children) == 0:
+            raise ValueError("Parent node must have children")
+        return f"<{self.tag}{self.props_to_html()}>{reduce(lambda text, node: text + node.to_html(), self.children, '')}</{self.tag}>"

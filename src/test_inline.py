@@ -5,6 +5,7 @@ from inlinesplit import (
     split_nodes_link, 
     text_to_textnodes,
     markdown_to_block,
+    block_to_block_type,
     )
 from textnode import TextNode, TextType
 
@@ -255,7 +256,49 @@ class TestInlineSplit(unittest.TestCase):
         correct = ["line 1", "line 2"]
         self.assertListEqual(correct, markdown_to_block(markdown))
 
+    def test_block_to_block_type_heading1(self):
+        text = "# heading"
+        self.assertEqual(block_to_block_type(text), "heading")
 
+    def test_block_to_block_type_heading2(self):
+        text = "## heading"
+        self.assertEqual(block_to_block_type(text), "heading")
+
+    def test_block_to_block_type_heading3(self):
+        text = "### heading"
+        self.assertEqual(block_to_block_type(text), "heading")
+
+    def test_block_to_block_type_heading4(self):
+        text = "#### heading"
+        self.assertEqual(block_to_block_type(text), "heading")
+
+    def test_block_to_block_type_heading5(self):
+        text = "##### heading"
+        self.assertEqual(block_to_block_type(text), "heading")
+
+    def test_block_to_block_type_heading6(self):
+        text = "###### heading"
+        self.assertEqual(block_to_block_type(text), "heading")
+    
+    def test_block_to_block_type_paragraph(self):
+        text = "This is a paragraph"
+        self.assertEqual(block_to_block_type(text), "paragraph")
+
+    def test_block_to_block_type_code(self):
+        text = "```This is a code block\nmore code\neven more code```"
+        self.assertEqual(block_to_block_type(text), "code")
+
+    def test_block_to_block_type_quote(self):
+        text = ">quote line 1\n>quote line 2\n> quote line 3"
+        self.assertEqual(block_to_block_type(text), "quote")
+
+    def test_block_to_block_type_unordered_list(self):
+        text = "* item1\n* item2\n* item 3"
+        self.assertEqual(block_to_block_type(text), "unordered list")
+
+    def test_block_to_block_type_ordered_list(self):
+        text = "1. item 1\n2. item 2\n3. item 3"
+        self.assertEqual(block_to_block_type(text), "ordered list")
 
 if __name__ == "__main__":
     unittest.main()

@@ -93,3 +93,25 @@ def markdown_to_block(markdown):
     blocks = map(lambda x: x.strip(" \n"), markdown.split("\n\n"))
     return list(filter(lambda x: x != "", blocks))
 
+def block_to_block_type(block):
+    lines = block.split("\n")
+
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
+        return "heading"
+    if block.startswith("```") and block.endswith("```"):
+        return "code"
+    if len(list(filter(lambda x: x.startswith(">"), lines))) == len(lines):
+        return "quote"
+    if len(list(filter(lambda x: x.startswith("* ") or x.startswith("- "), lines))) == len (lines):
+        return "unordered list"
+    i = 1
+    for line in lines:
+        if line.startswith(f"{i}. "):
+            i += 1
+            continue
+        break
+    if i - 1 == len(lines):
+        return "ordered list"
+    return "paragraph"
+
+    return

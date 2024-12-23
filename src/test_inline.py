@@ -1,5 +1,5 @@
 import unittest
-from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
 from textnode import TextNode, TextType
 
 class TestInlineSplit(unittest.TestCase):
@@ -73,6 +73,7 @@ class TestInlineSplit(unittest.TestCase):
             TextNode("code block", TextType.CODE)
         ]
         self.assertEqual(new_nodes, correct)
+    
     def test_inline_multiple_nodes_and_text_types(self):
         node = TextNode("This is text with a `code block` word", TextType.TEXT)
         node2 = TextNode("This is just text *italics*", TextType.TEXT)
@@ -198,5 +199,32 @@ class TestInlineSplit(unittest.TestCase):
         )
         correct = [node]
         self.assertEqual(correct, split_nodes_link([node]))
+    
+    def test_text_to_textnode(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        correct = [
+            TextNode("This is ", TextType.TEXT),
+            TextNode("text", TextType.BOLD),
+            TextNode(" with an ", TextType.TEXT),
+            TextNode("italic", TextType.ITALIC),
+            TextNode(" word and a ", TextType.TEXT),
+            TextNode("code block", TextType.CODE),
+            TextNode(" and an ", TextType.TEXT),
+            TextNode("obi wan image", TextType.IMAGES, "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", TextType.TEXT),
+            TextNode("link", TextType.LINKS, "https://boot.dev"),
+        ]
+        self.assertEqual(correct, text_to_textnodes(text))
+
+    def test_text_to_textnode_only_text(self):
+        text = "only text"
+        correct = [TextNode("only text", TextType.TEXT)]
+        self.assertEqual(correct, text_to_textnodes(text))
+
+    def test_text_to_textnode_invalid_syntax(self):
+        with self.assertRaises(ValueError):
+            text = "text *italic text* more text **invalid bold text"
+            nodes = text_to_textnodes(text)
+
 if __name__ == "__main__":
     unittest.main()

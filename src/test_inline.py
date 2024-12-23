@@ -1,5 +1,11 @@
 import unittest
-from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_textnodes
+from inlinesplit import (
+    split_nodes_delimiter, 
+    split_nodes_image, 
+    split_nodes_link, 
+    text_to_textnodes,
+    markdown_to_block,
+    )
 from textnode import TextNode, TextType
 
 class TestInlineSplit(unittest.TestCase):
@@ -225,6 +231,31 @@ class TestInlineSplit(unittest.TestCase):
         with self.assertRaises(ValueError):
             text = "text *italic text* more text **invalid bold text"
             nodes = text_to_textnodes(text)
+    
+    def test_markdown_to_blocks(self):
+        markdown = ("# This is a heading\n"
+        + "\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n"
+        + "\n* This is the first list item in a list block\n"
+        + "* This is a list item\n"
+        + "* This is another list item")
+        correct = [
+            "# This is a heading",
+            "This is a paragraph of text. It has some **bold** and *italic* words inside of it.",
+            "* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+        ]
+        self.assertListEqual(correct, markdown_to_block(markdown))
+    
+    def test_markdown_to_blocks_empty(self):
+        markdown = ""
+        correct = []
+        self.assertListEqual(correct, markdown_to_block(markdown))
+
+    def test_markdown_to_blocks_2_empty_lines(self):
+        markdown = "line 1\n\n\nline 2"
+        correct = ["line 1", "line 2"]
+        self.assertListEqual(correct, markdown_to_block(markdown))
+
+
 
 if __name__ == "__main__":
     unittest.main()

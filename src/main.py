@@ -1,6 +1,6 @@
-from textnode import TextNode, TextType
+from textnode import TextNode, TextType, text_node_to_html_node
 from htmlnode import HTMLNode, LeafNode, ParentNode
-from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link
+from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_children
 from extract_links import extract_markdown_images
 
 def main():
@@ -22,8 +22,14 @@ def main():
     print(link_split)
     print(split_nodes_image(link_split))
     # [("rick roll", "https://i.imgur.com/aKaOqIh.gif"), ("obi wan", "https://i.imgur.com/fJRm4Vk.jpeg")]
+    text = "This is `some code` in the text"
+    p1 = ParentNode("code", [LeafNode(None, "some code")])
+    p2 = ParentNode("pre", [p1])
+    code_node = ParentNode("pre", text_to_children(text))
+    print(code_node.to_html())
+    nested_parent = ParentNode("pre", [ParentNode("code", [LeafNode(None, "This is some code")])])
 
-    print(node_link_image)
+    print(p2.to_html())
 
 
 main()

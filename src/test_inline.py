@@ -6,8 +6,10 @@ from inlinesplit import (
     text_to_textnodes,
     markdown_to_block,
     block_to_block_type,
+    markdown_to_html_node
     )
 from textnode import TextNode, TextType
+from htmlnode import HTMLNode, ParentNode, LeafNode
 
 class TestInlineSplit(unittest.TestCase):
     def test_inline(self):
@@ -258,31 +260,31 @@ class TestInlineSplit(unittest.TestCase):
 
     def test_block_to_block_type_heading1(self):
         text = "# heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h1")
 
     def test_block_to_block_type_heading2(self):
         text = "## heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h2")
 
     def test_block_to_block_type_heading3(self):
         text = "### heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h3")
 
     def test_block_to_block_type_heading4(self):
         text = "#### heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h4")
 
     def test_block_to_block_type_heading5(self):
         text = "##### heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h5")
 
     def test_block_to_block_type_heading6(self):
         text = "###### heading"
-        self.assertEqual(block_to_block_type(text), "heading")
+        self.assertEqual(block_to_block_type(text), "h6")
     
     def test_block_to_block_type_paragraph(self):
         text = "This is a paragraph"
-        self.assertEqual(block_to_block_type(text), "paragraph")
+        self.assertEqual(block_to_block_type(text), "p")
 
     def test_block_to_block_type_code(self):
         text = "```This is a code block\nmore code\neven more code```"
@@ -290,15 +292,80 @@ class TestInlineSplit(unittest.TestCase):
 
     def test_block_to_block_type_quote(self):
         text = ">quote line 1\n>quote line 2\n> quote line 3"
-        self.assertEqual(block_to_block_type(text), "quote")
+        self.assertEqual(block_to_block_type(text), "blockquote")
 
     def test_block_to_block_type_unordered_list(self):
         text = "* item1\n* item2\n* item 3"
-        self.assertEqual(block_to_block_type(text), "unordered list")
+        self.assertEqual(block_to_block_type(text), "ul")
 
     def test_block_to_block_type_ordered_list(self):
         text = "1. item 1\n2. item 2\n3. item 3"
-        self.assertEqual(block_to_block_type(text), "ordered list")
+        self.assertEqual(block_to_block_type(text), "ol")
+    
+    def test_markdown_to_html_node_quote(self):
+        markdown = ">This will be a quote with\n>some *italics* in the quote"
+        h1node = LeafNode("h1", "header 1")
+        correct = (
+            "<div>" \
+                "<blockquote>"\
+                    "This will be a quote with some <i>italics</i> in the quote"\
+                "</blockquote>"\
+            "</div>"
+            )
+        self.assertEqual(markdown_to_html_node(markdown).to_html(), correct)
+
+    def test_markdown_to_html_node_h1(self):
+        markdown = "# header 1"
+        correct = "<div><h1>header 1</h1></div>"
+        self.assertEqual(correct, markdown_to_html_node(markdown).to_html())
+
+    def test_markdown_to_html_node_ul(self):
+        markdown = "* item 1\n* item 2\n* *italic* item 3"
+        correct = (
+            "<div>" \
+                "<ul>"\
+                    "<li>item 1</li>"\
+                    "<li>item 2</li>"\
+                    "<li><i>italic</i> item 3</li>"\
+                "</ul>"\
+            "</div>"
+            )
+        self.assertEqual(markdown_to_html_node(markdown).to_html(), correct)
+
+    def test_markdown_to_html_node_ol(self):
+        markdown = "1. item 1\n2. item 2\n3. *italic* item 3"
+        correct = (
+            "<div>" \
+                "<ol>"\
+                    "<li>item 1</li>"\
+                    "<li>item 2</li>"\
+                    "<li><i>italic</i> item 3</li>"\
+                "</ol>"\
+            "</div>"
+            )
+        self.assertEqual(markdown_to_html_node(markdown).to_html(), correct)
+
+    def test_markdown_to_html_node_code(self):
+        markdown = "```This is a code block```"
+        correct = (
+            "<div>"\
+                "<pre><code>This is a code block</code></pre>"\
+            "</div>"
+            )
+        self.assertEqual(markdown_to_html_node(markdown).to_html(), correct)
+
+    def test_markdown_to_html_node_paragraph(self):
+        markdown = "A simple paragraph with some **bold text**"
+        correct = (
+            "<div>" \
+                "<p>"\
+                    "A simple paragraph with some "\
+                    "<b>bold text</b>"\
+                "</p>"\
+            "</div>"
+            )
+        self.assertEqual(markdown_to_html_node(markdown).to_html(), correct)
+
 
 if __name__ == "__main__":
     unittest.main()

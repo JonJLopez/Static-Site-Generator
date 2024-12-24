@@ -1,5 +1,6 @@
-from textnode import TextType, TextNode
+from textnode import TextType, TextNode, text_node_to_html_node
 from extract_links import extract_markdown_images, extract_markdown_links
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
@@ -96,14 +97,24 @@ def markdown_to_block(markdown):
 def block_to_block_type(block):
     lines = block.split("\n")
 
-    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
-        return "heading"
+    if block.startswith(("# ")):
+        return "h1"
+    if block.startswith("## "):
+        return "h2"
+    if block.startswith("### "):
+        return "h3"
+    if block.startswith("#### "):
+        return "h4"
+    if block.startswith("##### "):
+        return "h5"
+    if block.startswith("###### "):
+        return "h6"
     if block.startswith("```") and block.endswith("```"):
         return "code"
     if len(list(filter(lambda x: x.startswith(">"), lines))) == len(lines):
-        return "quote"
+        return "blockquote"
     if len(list(filter(lambda x: x.startswith("* ") or x.startswith("- "), lines))) == len (lines):
-        return "unordered list"
+        return "ul"
     i = 1
     for line in lines:
         if line.startswith(f"{i}. "):
@@ -111,7 +122,42 @@ def block_to_block_type(block):
             continue
         break
     if i - 1 == len(lines):
-        return "ordered list"
-    return "paragraph"
+        return "ol"
+    return "p"
 
-    return
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_block(markdown)
+    htmlnodes = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        match block_type:
+            case "blockquote":
+                text = " ".join(map(lambda x: x[1:], block.split("\n")))
+                htmlnodes.append(ParentNode("blockquote", text_to_children(text)))
+            case "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
+                htmlnodes.append(ParentNode(block_type, text_to_children(block[2:])))
+            case "ul":
+                list_items = []
+                for list_item in block.split("\n"):
+                    list_items.append(ParentNode("li", text_to_children(list_item[2:])))
+                htmlnodes.append(ParentNode(block_type, list_items))
+            case "ol":
+                list_items = []
+                for list_item in block.split("\n"):
+                    list_items.append(ParentNode("li", text_to_children(list_item[3:])))
+                htmlnodes.append(ParentNode(block_type, list_items))
+            case "code":
+                code_node = LeafNode("code", block[3:-3])
+                htmlnodes.append(ParentNode("pre", [code_node]))
+            case "p":
+                htmlnodes.append(ParentNode("p", text_to_children(block)))
+
+    parentnode = ParentNode("div", htmlnodes)
+    return parentnode
+
+def text_to_children(text):
+    children_nodes = []
+    textnodes = text_to_textnodes(text)
+    for text_node in textnodes:
+        children_nodes.append(text_node_to_html_node(text_node))
+    return children_nodes

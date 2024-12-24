@@ -132,7 +132,7 @@ def markdown_to_html_node(markdown):
         block_type = block_to_block_type(block)
         match block_type:
             case "blockquote":
-                text = " ".join(map(lambda x: x[1:], block.split("\n")))
+                text = " ".join(map(lambda x: x[1:].strip(), block.split("\n")))
                 htmlnodes.append(ParentNode("blockquote", text_to_children(text)))
             case "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
                 htmlnodes.append(ParentNode(block_type, text_to_children(block[2:])))

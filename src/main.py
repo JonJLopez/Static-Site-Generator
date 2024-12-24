@@ -2,7 +2,7 @@ from textnode import TextNode, TextType, text_node_to_html_node
 from htmlnode import HTMLNode, LeafNode, ParentNode
 from inlinesplit import split_nodes_delimiter, split_nodes_image, split_nodes_link, text_to_children
 from extract_links import extract_markdown_images
-from page_generator import generate_page
+from page_generator import generate_page, generate_pages_recursive
 import os
 import shutil
 
@@ -25,6 +25,6 @@ def copy_source_to_destination(src, dest):
 
 def main():
     copy_source_to_destination("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 main()
